@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\AbstractBackground.jpeg" />
     <None Remove="Assets\pexels-johannes-plenio-1103970.jpg" />
   </ItemGroup>
 
@@ -22,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\AbstractBackground.jpeg" />
     <Resource Include="Assets\pexels-johannes-plenio-1103970.jpg" />
   </ItemGroup>
 
