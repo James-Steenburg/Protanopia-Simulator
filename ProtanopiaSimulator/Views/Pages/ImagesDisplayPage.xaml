@@ -37,7 +37,7 @@
             HorizontalAlignment="Center"
             Orientation="Horizontal">
             <ui:Image
-                Height="400"
+                Height="320"
                 Margin="10"
                 HorizontalAlignment="Center"
                 BorderBrush="#33000000"
@@ -45,7 +45,7 @@
                 CornerRadius="4"
                 Source="{Binding ViewModel.SelectedImagePath}" />
             <ui:Image
-                Height="400"
+                Height="320"
                 Margin="10"
                 HorizontalAlignment="Center"
                 BorderBrush="#33000000"

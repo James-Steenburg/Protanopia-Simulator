@@ -22,6 +22,17 @@ namespace ProtanopiaSimulator.ViewModels.Pages
             .ApplicationTheme
             .Unknown;
 
+        [RelayCommand]
+        private void OpenGITProjectPage(object obj)
+        {
+            var destinationurl = "https://github.com/James-Steenburg/Protanopia-Simulator";
+            var sInfo = new System.Diagnostics.ProcessStartInfo(destinationurl)
+            {
+                UseShellExecute = true,
+            };
+            System.Diagnostics.Process.Start(sInfo);
+        }
+
         public void OnNavigatedTo()
         {
             if (!_isInitialized)

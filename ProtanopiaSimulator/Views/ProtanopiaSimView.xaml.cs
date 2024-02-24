@@ -26,6 +26,7 @@ namespace ProtanopiaSimulator.Views
         public ProtanopiaSimView(
             ViewModels.ProtanopiaViewModel viewModel,
             IPageService pageService,
+            ISnackbarService snackbarService,
             INavigationService navigationService
             )
         {
@@ -37,6 +38,7 @@ namespace ProtanopiaSimulator.Views
             InitializeComponent();
             SetPageService(pageService);
 
+            snackbarService.SetSnackbarPresenter(SnackbarPresenter);
             navigationService.SetNavigationControl(RootNavigation);
         }
 

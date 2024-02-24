@@ -54,6 +54,11 @@
                     FontSize="28"
                     FontWeight="DemiBold" />
             </ui:NavigationView.Header>
+            <ui:NavigationView.ContentOverlay>
+                <Grid>
+                    <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
+                </Grid>
+            </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
         <ui:TitleBar

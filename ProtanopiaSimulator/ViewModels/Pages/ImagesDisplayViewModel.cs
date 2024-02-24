@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -14,11 +15,13 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Wpf.Ui.Controls;
+using Wpf.Ui;
 using Color = System.Drawing.Color;
 
 namespace ProtanopiaSimulator.ViewModels.Pages
 {
-    public partial class ImagesDisplayViewModel : ObservableObject
+    public partial class ImagesDisplayViewModel(ISnackbarService snackbarService) : ObservableObject
     {
         [ObservableProperty]
         private bool _isSaveButtonEnabled = false;
@@ -27,7 +30,10 @@ namespace ProtanopiaSimulator.ViewModels.Pages
         private string _selectedImagePath = "pack://application:,,,/Assets/pexels-johannes-plenio-1103970.jpg";
 
         [ObservableProperty]
-        private ImageSource _transformedImage;
+        private ImageSource? _transformedImage;
+
+        [ObservableProperty]
+        private Bitmap? _transformedBitmap;
 
         [ObservableProperty]
         private double _q1 = 1.05118294;
@@ -37,6 +43,20 @@ namespace ProtanopiaSimulator.ViewModels.Pages
 
         [ObservableProperty]
         private Visibility _secondImageVisibility = Visibility.Collapsed;
+
+        private ControlAppearance _snackbarAppearance = ControlAppearance.Secondary;
+
+        private int _snackbarAppearanceComboBoxSelectedIndex = 1;
+
+        public int SnackbarAppearanceComboBoxSelectedIndex
+        {
+            get => _snackbarAppearanceComboBoxSelectedIndex;
+            set
+            {
+                SetProperty<int>(ref _snackbarAppearanceComboBoxSelectedIndex, value);
+                UpdateSnackbarAppearance(value);
+            }
+        }
 
         [RelayCommand]
         private void RunSimulation()
@@ -53,6 +73,7 @@ namespace ProtanopiaSimulator.ViewModels.Pages
                 }
             }
             TransformedImage = ImageSourceFromBitmap(bitmapModified);
+            TransformedBitmap = bitmapModified;
             SecondImageVisibility = Visibility.Visible;
             IsSaveButtonEnabled = true;
         }
@@ -65,30 +86,67 @@ namespace ProtanopiaSimulator.ViewModels.Pages
             dlg.Filter = "Image files (*.jpg)|*.jpg|All Files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
-            //string SelectedFileName;
-            
             if (dlg.ShowDialog() == true)
             {
                 SelectedImagePath = dlg.FileName;
-                //SelectedFileName = dlg.FileName;
-                //FileNameLabel.Content = SelectedFileName;
-                //BitmapImage bitmap = new BitmapImage();
-                //bitmap.BeginInit();
-                //bitmap.UriSource = new Uri(SelectedImagePath);
-                //bitmap.EndInit();
-                //ImageViewer1.Source = bitmap;
-
                 SecondImageVisibility = Visibility.Collapsed;
                 IsSaveButtonEnabled = false;
-
             }
-            
         }
 
         [RelayCommand]
         private void SaveSimulatedImage()
         {
-            //ounter++;
+            try
+            {
+                SaveFileDialog save = new SaveFileDialog();
+                save.Title = "Save picture as ";
+                save.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp)|*.jpg; *.jpeg; *.gif; *.bmp";
+                if (TransformedImage != null)
+                {
+                    if (save.ShowDialog() == true)
+                    {
+                        TransformedBitmap.Save(save.FileName, System.Drawing.Imaging.ImageFormat.Png);
+
+                        SnackbarAppearanceComboBoxSelectedIndex = 3;
+                        snackbarService.Show(
+                        "Success:",
+                        "The application saved your image to " + save.FileName,
+                        _snackbarAppearance,
+                        new SymbolIcon(SymbolRegular.CheckmarkCircle24),
+                        TimeSpan.FromSeconds(3)
+                        );
+                    }
+                }
+                
+            }
+            catch
+            {
+                SnackbarAppearanceComboBoxSelectedIndex = 5;
+                snackbarService.Show(
+                "Error:",
+                "The application failed to save your image.",
+                _snackbarAppearance,
+                new SymbolIcon(SymbolRegular.ErrorCircle24),
+                TimeSpan.FromSeconds(3)
+                );
+            }
+        }
+
+        private void UpdateSnackbarAppearance(int appearanceIndex)
+        {
+            _snackbarAppearance = appearanceIndex switch
+            {
+                1 => ControlAppearance.Secondary,
+                2 => ControlAppearance.Info,
+                3 => ControlAppearance.Success,
+                4 => ControlAppearance.Caution,
+                5 => ControlAppearance.Danger,
+                6 => ControlAppearance.Light,
+                7 => ControlAppearance.Dark,
+                8 => ControlAppearance.Transparent,
+                _ => ControlAppearance.Primary
+            };
         }
 
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
@@ -135,7 +193,7 @@ namespace ProtanopiaSimulator.ViewModels.Pages
             };
 
             double L2, M2, S2;
-            //Placeholders
+
             L2 = simulateProtanopiaMatrix[0, 0] * L + simulateProtanopiaMatrix[0, 1] * M + simulateProtanopiaMatrix[0, 2] * S;
             M2 = simulateProtanopiaMatrix[1, 0] * L + simulateProtanopiaMatrix[1, 1] * M + simulateProtanopiaMatrix[1, 2] * S;
             S2 = simulateProtanopiaMatrix[2, 0] * L + simulateProtanopiaMatrix[2, 1] * M + simulateProtanopiaMatrix[2, 2] * S;
